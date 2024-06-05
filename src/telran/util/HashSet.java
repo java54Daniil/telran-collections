@@ -1,7 +1,9 @@
 package telran.util;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 @SuppressWarnings("unchecked")
 public class HashSet<T> implements Set<T> {
@@ -12,56 +14,48 @@ public class HashSet<T> implements Set<T> {
 	float factor;
 
 	private class HashSetIterator implements Iterator<T> {
-		private int currentBucket = 0;
-		private Iterator<T> listIterator = getNextIterator();
-		private boolean ifHasNext = false;
+		Iterator<T> iterator;
+
+		int iteratorIndex;
+
+		HashSetIterator() {
+			iteratorIndex = 0;
+			iterator = getIterator(0);
+			setIteratorIndex();
+		}
+
+		private Iterator<T> getIterator(int index) {
+			List<T> list = hashTable[index];
+			return list == null ? null : list.iterator();
+		}
 
 		@Override
 		public boolean hasNext() {
-			ifHasNext = false;
-			if (listIterator != null) {
-				if (listIterator.hasNext()) {
-					ifHasNext = true;
-				} else {
-					while (currentBucket + 1 < hashTable.length && !ifHasNext) {
-						currentBucket++;
-						if (hashTable[currentBucket] != null) {
-							listIterator = hashTable[currentBucket].iterator();
-							if (listIterator.hasNext()) {
-								ifHasNext = true;
-							}
-						}
-					}
-				}
-			}
-			return ifHasNext;
+
+			return iteratorIndex < hashTable.length;
 		}
 
 		@Override
 		public T next() {
-			T res = null;
-			if (hasNext()) {
-				res = listIterator.next();
-			} else {
+			if (!hasNext()) {
 				throw new NoSuchElementException();
 			}
+			T res = iterator.next();
+			setIteratorIndex();
 			return res;
 		}
 
-		private Iterator<T> getNextIterator() {
-			Iterator<T> res = null;
-			boolean found = false;
-			while (currentBucket < hashTable.length && !found) {
-				if (hashTable[currentBucket] != null) {
-					res = hashTable[currentBucket].iterator();
-					found = true;
-				}
-				if (!found) {
-					currentBucket++;
-				}
+		private void setIteratorIndex() {
+			int limit = hashTable.length - 1; // for not doing checking index inside iteration
+			while (iteratorIndex < limit && (iterator == null || !iterator.hasNext())) {
+				iteratorIndex++;
+				iterator = getIterator(iteratorIndex);
 			}
-			return res;
+			if (iteratorIndex == limit && (hashTable[iteratorIndex] == null || !iterator.hasNext())) {
+				iteratorIndex++;
+			}
 		}
+
 	}
 
 	public HashSet(int hashTableLength, float factor) {
@@ -102,43 +96,36 @@ public class HashSet<T> implements Set<T> {
 	}
 
 	private void addObjInHashTable(T obj, List<T>[] table) {
-		int index = getIndex(obj);
+		int index = getIndex(obj, table.length);
 		List<T> list = table[index];
 		if (list == null) {
 			list = new LinkedList<>();
-			hashTable[index] = list;
+			table[index] = list;
 		}
 		list.add(obj);
 
 	}
 
-	private int getIndex(T obj) {
+	private int getIndex(T obj, int length) {
 		int hashCode = obj.hashCode();
-		int index = Math.abs(hashCode % hashTable.length);
+		int index = Math.abs(hashCode % length);
 		return index;
 	}
 
 	@Override
 	public boolean remove(T pattern) {
-		boolean res = false;
-		int index = getIndex(pattern);
-		List<T> list = hashTable[index];
-		if (list != null) {
-			boolean removed = list.remove(pattern);
-			if (removed) {
-				size--;
-				if (list.size() == 0) {
-					hashTable[index] = null;
-				}
-				res = true;
-			}
+		boolean res = contains(pattern);
+		if (res) {
+			int index = getIndex(pattern, hashTable.length);
+			hashTable[index].remove(pattern);
+			size--;
 		}
 		return res;
 	}
 
 	@Override
 	public boolean contains(T pattern) {
-		int index = getIndex(pattern);
+		int index = getIndex(pattern, hashTable.length);
 		List<T> list = hashTable[index];
 		return list != null && list.contains(pattern);
 	}
@@ -158,17 +145,14 @@ public class HashSet<T> implements Set<T> {
 	@Override
 	public T get(T pattern) {
 		T res = null;
-		boolean found = false;
-		int index = getIndex(pattern);
-		List<T> list = hashTable[index];
-		if (list != null) {
-			for (T element : list) {
-				if (!found && element.equals(pattern)) {
-					res = element;
-					found = true;
-				}
-			}
+		if (contains(pattern)) {
+			int index = getIndex(pattern, hashTable.length);
+			List<T> list = hashTable[index];
+			int indexInList = list.indexOf(pattern);
+			res = list.get(indexInList);
+
 		}
 		return res;
 	}
+
 }
