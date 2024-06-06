@@ -4,20 +4,25 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.function.Predicate;
 
-public class ArrayList<T> implements List<T> {
+public class ArrayList<T> extends AbstractCollection<T> implements List<T> {
 	private static final int DEFAULT_CAPACITY = 16;
-	private int size;
 	private T[] array;
+
 	@SuppressWarnings("unchecked")
 	public ArrayList(int capacity) {
 		array = (T[]) new Object[capacity];
 	}
+
 	public ArrayList() {
 		this(DEFAULT_CAPACITY);
 	}
+
 	private class ArrayListIterator implements Iterator<T> {
 		int currentIndex = 0;
+		boolean flNext = false;
+
 		@Override
 		public boolean hasNext() {
 			return currentIndex < size;
@@ -25,13 +30,24 @@ public class ArrayList<T> implements List<T> {
 
 		@Override
 		public T next() {
-			if(!hasNext()) {
+			if (!hasNext()) {
 				throw new NoSuchElementException();
 			}
+			flNext = true;
 			return array[currentIndex++];
 		}
-		
+
+		@Override
+		public void remove() {
+			if (!flNext) {
+				throw new IllegalStateException();
+			}
+			ArrayList.this.remove(--currentIndex);
+			flNext = false;
+
+		}
 	}
+
 	@Override
 	/**
 	 * adds object at end of array, that is, at index == size
@@ -42,28 +58,12 @@ public class ArrayList<T> implements List<T> {
 		return true;
 	}
 
-	
 	@Override
-	public boolean remove(T pattern) {
-		int index = indexOf(pattern);
-		boolean res = false;
-		if (index > -1) {
-			res = true;
-			remove(index);
-		}
-		return res;
-	}
-
-	@Override
-	public boolean contains(T pattern) {
-		
-		return indexOf(pattern) > -1;
-	}
-
-	@Override
-	public int size() {
-		
-		return size;
+	public boolean reemoveIf(Predicate<T> predicate) {
+		// TODO
+		// Two indexes on one array
+		// no allocation for new array
+		return false;
 	}
 
 	@Override
@@ -87,11 +87,12 @@ public class ArrayList<T> implements List<T> {
 	}
 
 	private void allocateIfNeeded() {
-		if(size == array.length) {
+		if (size == array.length) {
 			array = Arrays.copyOf(array, array.length * 2);
 		}
-		
+
 	}
+
 	@Override
 	public T remove(int index) {
 		List.checkIndex(index, size, true);
@@ -104,7 +105,7 @@ public class ArrayList<T> implements List<T> {
 	@Override
 	public int indexOf(T pattern) {
 		int index = 0;
-		while(index < size && !Objects.equals(array[index], pattern)) {
+		while (index < size && !Objects.equals(array[index], pattern)) {
 			index++;
 		}
 		return index < size ? index : -1;
@@ -113,7 +114,7 @@ public class ArrayList<T> implements List<T> {
 	@Override
 	public int lastIndexOf(T pattern) {
 		int index = size - 1;
-		while(index >= 0 && !Objects.equals(array[index], pattern)) {
+		while (index >= 0 && !Objects.equals(array[index], pattern)) {
 			index--;
 		}
 		return index;
