@@ -60,10 +60,20 @@ public class ArrayList<T> extends AbstractCollection<T> implements List<T> {
 
 	@Override
 	public boolean reemoveIf(Predicate<T> predicate) {
-		// TODO
 		// Two indexes on one array
 		// no allocation for new array
-		return false;
+		   int originalSize = size;
+		    int newIndex = 0;
+
+		    for (int i = 0; i < size; i++) {
+		        if (!predicate.test(array[i])) {
+		            array[newIndex++] = array[i];
+		        }
+		    }
+
+		   
+		    size = newIndex;
+		    return size < originalSize;
 	}
 
 	@Override

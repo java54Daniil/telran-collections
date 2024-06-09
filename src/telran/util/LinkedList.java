@@ -27,7 +27,7 @@ public class LinkedList<T> extends AbstractCollection<T> implements List<T> {
 
 	private class LinkedListIterator implements Iterator<T> {
 		Node<T> current = head;
-
+		Node<T> lastReturned = null;
 		@Override
 		public boolean hasNext() {
 			return current != null;
@@ -38,13 +38,18 @@ public class LinkedList<T> extends AbstractCollection<T> implements List<T> {
 			if (!hasNext()) {
 				throw new NoSuchElementException();
 			}
+			 lastReturned = current;
 			T res = current.data;
 			current = current.next;
 			return res;
 		}
 		@Override
 		public void remove() {
-			//TODO
+			 if (lastReturned == null) {
+	                throw new IllegalStateException();
+	            }
+	            removeNode(lastReturned);
+	            lastReturned = null;
 		}
 	}
 

@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+
 public class TreeSet<T> extends AbstractCollection<T> implements SortedSet<T> {
 	private static class Node<T> {
 		T data;
@@ -19,7 +20,7 @@ public class TreeSet<T> extends AbstractCollection<T> implements SortedSet<T> {
 
 	private class TreeSetIterator implements Iterator<T> {
 		Node<T> current = getLeastFrom(root);
-
+		Node<T> lastReturned = null;
 		@Override
 		public boolean hasNext() {
 
@@ -31,13 +32,18 @@ public class TreeSet<T> extends AbstractCollection<T> implements SortedSet<T> {
 			if (!hasNext()) {
 				throw new NoSuchElementException();
 			}
+			lastReturned = current;
 			T res = current.data;
 			current = getCurrent(current);
 			return res;
 		}
 		@Override
 		public void remove() {
-			//TODO
+			 if (lastReturned == null) {
+	                throw new IllegalStateException();
+	            }
+	            removeNode(lastReturned);
+	            lastReturned = null;
 		}
 
 	}
