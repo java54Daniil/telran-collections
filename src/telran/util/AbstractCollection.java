@@ -8,5 +8,6 @@ public abstract class AbstractCollection<T> implements Collection<T> {
 
 		return size;
 	}
+	
 
 }
