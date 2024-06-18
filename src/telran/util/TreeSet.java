@@ -4,7 +4,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-
 public class TreeSet<T> extends AbstractCollection<T> implements SortedSet<T> {
 	private static class Node<T> {
 		T data;
@@ -21,6 +20,7 @@ public class TreeSet<T> extends AbstractCollection<T> implements SortedSet<T> {
 	private class TreeSetIterator implements Iterator<T> {
 		Node<T> current = getLeastFrom(root);
 		Node<T> lastReturned = null;
+
 		@Override
 		public boolean hasNext() {
 
@@ -37,20 +37,33 @@ public class TreeSet<T> extends AbstractCollection<T> implements SortedSet<T> {
 			current = getCurrent(current);
 			return res;
 		}
+
 		@Override
 		public void remove() {
-			 if (lastReturned == null) {
-	                throw new IllegalStateException();
-	            }
-	            removeNode(lastReturned);
-	            lastReturned = null;
+			if (lastReturned == null) {
+				throw new IllegalStateException();
+			}
+			removeNode(lastReturned);
+			lastReturned = null;
 		}
 
 	}
 
+	private static final int DEFAULT_SPACES_PER_LEVEL = 2;
+
 	Node<T> root;
 
 	private Comparator<T> comp;
+
+	private int spacesPerLevel = DEFAULT_SPACES_PER_LEVEL;
+
+	public int getSpacesPerLevel() {
+		return spacesPerLevel;
+	}
+
+	public void setSpacesPerLevel(int spacesPerLevel) {
+		this.spacesPerLevel = spacesPerLevel;
+	}
 
 	public TreeSet(Comparator<T> comp) {
 		this.comp = comp;
@@ -234,6 +247,103 @@ public class TreeSet<T> extends AbstractCollection<T> implements SortedSet<T> {
 			}
 		}
 		return node;
+	}
+
+	@Override
+	/**
+	 * Returns the greatest element in this set less than or equal to the given
+	 * element, or null if there is no such element
+	 * 
+	 * 
+	 */
+	public T floor(T key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	/**
+	 * Returns the least element in this set greater than or equal to the given
+	 * element, or null if there is no such element.
+	 * 
+	 * 
+	 */
+	public T ceiling(T key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * display tree in the following form -20 10 1 -5 100
+	 */
+	public void displayRootChildren() {
+		// TODO
+	}
+
+	/******************************************************/
+	/**
+	 * conversion of tree so that iterating has been in the inversive order
+	 */
+	public void treeInversion() {
+		// TODO
+	}
+
+	/**
+	 * displays tree in the following form 100 10 1 -5 -20
+	 */
+	public void displayTreeRotated() {
+		displayTreeRotated(root, 1);
+	}
+
+	private void displayTreeRotated(Node<T> tmpRoot, int level) {
+		if (tmpRoot != null) {
+			displayTreeRotated(tmpRoot.right, level + 1);
+			displayRoot(tmpRoot, level);
+			displayTreeRotated(tmpRoot.left, level + 1);
+		}
+
+	}
+
+	private void displayRoot(Node<T> tmpRoot, int level) {
+		System.out.printf("%s", " ".repeat(level * spacesPerLevel));
+		System.out.println(tmpRoot.data);
+	}
+	/**
+	 * 
+	 * @return number of leaves(leaf - node with both left and right nulls)
+	 */
+	public int width() {
+		return width(root);
+	}
+	private int width(Node<T> tmpRoot) {
+		int res =0;
+		if(tmpRoot != null) {
+			if(tmpRoot.left == null && tmpRoot.right ==null) {
+				res =1;
+			}else {
+				res = width(tmpRoot.left) +width(tmpRoot.right);
+			}
+		}
+		return res;
+	}
+
+	/******************************************************/
+	/**
+	 * 
+	 * @return number of the nodes of the longest line 
+	 */
+	public int heigth() {
+		return height(root);
+	}
+
+	private int height(Node<T> tmpRoot) {
+		int res = 0;
+		if(tmpRoot !=null) {
+			int heightLeft = height(tmpRoot.left);
+			int	heightRight = height(tmpRoot.right);
+			res = Math.max(heightLeft, heightRight)+1;
+		}
+		return res;
 	}
 
 }

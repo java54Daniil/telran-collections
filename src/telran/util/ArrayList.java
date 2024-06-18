@@ -71,7 +71,10 @@ public class ArrayList<T> extends AbstractCollection<T> implements List<T> {
 		        }
 		    }
 
-		   
+		    for(int i = newIndex; i < size; i++) {
+				//putting null's to removed elements
+				array[i] = null;
+			}
 		    size = newIndex;
 		    return size < originalSize;
 	}
