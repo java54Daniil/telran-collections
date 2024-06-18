@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import telran.util.SortedSet;
 
 
-class SortedSetTest extends SetTest {
+abstract class SortedSetTest extends SetTest {
 
 	SortedSet<Integer> set;
 	@Override

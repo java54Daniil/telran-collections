@@ -51,6 +51,8 @@ public class TreeSet<T> extends AbstractCollection<T> implements SortedSet<T> {
 
 	private static final int DEFAULT_SPACES_PER_LEVEL = 2;
 
+	private static final int SEPARATOR_LENGTH = 20;
+
 	Node<T> root;
 
 	private Comparator<T> comp;
@@ -257,8 +259,10 @@ public class TreeSet<T> extends AbstractCollection<T> implements SortedSet<T> {
 	 * 
 	 */
 	public T floor(T key) {
-		// TODO Auto-generated method stub
-		return null;
+	
+		
+		return floorCeiling(key, true);
+	
 	}
 
 	@Override
@@ -269,27 +273,73 @@ public class TreeSet<T> extends AbstractCollection<T> implements SortedSet<T> {
 	 * 
 	 */
 	public T ceiling(T key) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return floorCeiling(key, false);
+		
+	}
+	private T floorCeiling(T key, boolean isFloor) {
+		T res = null;
+		int compRes = 0;
+		Node<T> current = root;
+		while (current != null && (compRes = comp.compare(key, current.data)) != 0) {
+			if ((compRes < 0 && !isFloor) || (compRes > 0 && isFloor)) {
+				res = current.data;
+			}
+			current = compRes < 0 ? current.left : current.right;
+		}
+		return current == null ? res : current.data;
+
 	}
 
-	/**
-	 * display tree in the following form -20 10 1 -5 100
-	 */
+	 /* display tree in the following form:
+		 *  -20
+		 *     10
+		 *        1
+		 *           -5
+		 *        100
+		 */
 	public void displayRootChildren() {
-		// TODO
+		System.out.printf("%s %s\n","ROOT->CHILDREN", "=".repeat(SEPARATOR_LENGTH));
+		displayRootChildren(root, 1);
 	}
-
+	private void displayRootChildren(Node<T> tmpRoot, int level) {
+		if(tmpRoot != null) {
+			displayRoot(tmpRoot, level);
+			displayRootChildren(tmpRoot.left, level + 1);
+			displayRootChildren(tmpRoot.right, level + 1);
+		}
+		
+	}
 	/******************************************************/
 	/**
 	 * conversion of tree so that iterating has been in the inversive order
 	 */
 	public void treeInversion() {
-		// TODO
+		comp = comp.reversed();
+		treeInversion(root);
+		    }
+		  
+	private void treeInversion(Node<T> tmpRoot) {
+		if(tmpRoot != null) {
+			swapLeftRight(tmpRoot);
+			treeInversion(tmpRoot.left);
+			treeInversion(tmpRoot.right);
+		}
+		
 	}
-
+	private void swapLeftRight(Node<T> tmpRoot) {
+		Node<T> tmp = tmpRoot.left;
+		tmpRoot.left = tmpRoot.right;
+		tmpRoot.right = tmp;
+		
+	}
 	/**
-	 * displays tree in the following form 100 10 1 -5 -20
+	 * displays tree in the following form
+	 *           100
+	 *         10
+	 *           1
+	 *              -5
+	 *   -20           
 	 */
 	public void displayTreeRotated() {
 		displayTreeRotated(root, 1);
@@ -342,6 +392,40 @@ public class TreeSet<T> extends AbstractCollection<T> implements SortedSet<T> {
 			int heightLeft = height(tmpRoot.left);
 			int	heightRight = height(tmpRoot.right);
 			res = Math.max(heightLeft, heightRight)+1;
+		}
+		return res;
+	}
+	public void balance() {
+		// sorted array of tree nodes
+		if(root != null) {
+			Node<T>[] arrayNodes = getNodesArray();
+			root = balanceArray(arrayNodes ,0 ,size-1 ,null);
+			
+		}
+		
+		
+	}
+
+	private Node<T> balanceArray(Node<T>[] arrayNodes, int left, int right, Node<T> parent) {
+		Node<T> root= null;
+		if(left<= right) {
+			int indexRoot = (left + right) / 2;
+			root= arrayNodes[indexRoot];
+			root.parent = parent;
+			root.left = balanceArray(arrayNodes, left, indexRoot-1, root);
+			root.right =balanceArray(arrayNodes, indexRoot+1, right, root);
+		}
+		
+		return root;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Node<T>[] getNodesArray() {
+		Node<T>[] res = new Node[size];
+		Node<T> current = getLeastFrom(root);
+		for(int i = 0 ; i< size ; i++) {
+			res[i] = current;
+			current = getCurrent(current);
 		}
 		return res;
 	}
